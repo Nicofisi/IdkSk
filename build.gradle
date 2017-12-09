@@ -19,7 +19,7 @@ plugins {
 apply plugin: 'kotlin'
 
 group 'me.nicofisi'
-version '0.1'
+version '1.1.1'
 
 sourceCompatibility = 1.8
 
@@ -54,6 +54,12 @@ shadowJar {
 }
 jar {
     manifest {
-        attributes 'Hello': "hi"
+        attributes 'Name': name
+        attributes 'Specification-Title': name
+        attributes 'Specification-Version': version
+        attributes 'Specification-Vendor': 'Nicofisi'
+        attributes 'Implementation-Title': name
+        attributes 'Implementation-Version': version
+        attributes 'Implementation-Vendor': 'Nicofisi'
     }
 }

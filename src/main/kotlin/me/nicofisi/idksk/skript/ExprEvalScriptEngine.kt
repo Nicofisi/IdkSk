@@ -32,12 +32,17 @@ class ExprEvalScriptEngine : SimpleExpression<Any>() {
         return true
     }
 
-    override fun get(e: Event?): Array<Any>? {
-        val code = code?.getArray(e)
-        val engine = engine?.getSingle(e)
+    override fun get(e: Event?): Array<Any?>? {
+        try {
+            throw RuntimeException()
+        } catch (ex: RuntimeException) {
+            ex.printStackTrace()
+        }
+        val code = code!!.getArray(e)
+        val engine = engine!!.getSingle(e)
         if (code == null || engine == null) return null
         return try {
-            arrayOf(engine.eval(java.lang.String.join("\n", code.asIterable())))
+            arrayOf(engine.eval(java.lang.String.join("\n", *code)))
         } catch (t: ScriptException) {
             arrayOf(t)
         }
