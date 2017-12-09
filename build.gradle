@@ -1,0 +1,59 @@
+buildscript {
+    ext.kotlin_version = '1.1.4-3'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'idea'
+//    id 'com.sedmelluq.jdaction' version "1.0.2"
+    id 'com.github.johnrengelman.shadow' version '2.0.1'
+}
+
+apply plugin: 'kotlin'
+
+group 'me.nicofisi'
+version '0.1'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://raw.githubusercontent.com/bensku/mvn-repo/master"
+    }
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+//    compile files ("libs/JDA-3.3.1_DEV-withDependencies.jar")
+    compileOnly files ("libs/spigot-1.12.2.jar")
+    compile("ch.njol:skript:2.2-dev32") {
+        transitive = false
+    }
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+shadowJar {
+    mergeServiceFiles()
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+}
+jar {
+    manifest {
+        attributes 'Hello': "hi"
+    }
+}
