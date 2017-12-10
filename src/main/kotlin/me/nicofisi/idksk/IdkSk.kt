@@ -3,10 +3,12 @@ package me.nicofisi.idksk
 import ch.njol.skript.Skript
 import ch.njol.skript.classes.ClassInfo
 import ch.njol.skript.registrations.Classes
+import org.apache.commons.io.IOUtils
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
+import org.mcstats.Metrics
+import java.net.URL
 import javax.script.ScriptEngine
-import javax.script.ScriptEngineManager
 import javax.script.ScriptException
 
 class IdkSk : JavaPlugin() {
@@ -35,7 +37,22 @@ class IdkSk : JavaPlugin() {
                 .user("script exception", "scriptexception", "scripting exception")
         )
 
+        Metrics(this).start()
+
         logger.info("I find it kind of surprising, but everything loaded successfully!")
+
+        Bukkit.getScheduler().runTaskAsynchronously(this, {
+            val text = "int-version "
+            val ymlUrl = URL("https://raw.githubusercontent.com/Nicofisi/IdkSk/master/src/main/resources/plugin.yml")
+            val latestYml = IOUtils.toString(ymlUrl, "UTF-8")
+            val latestVer = latestYml.split("\n").map { it.trim() }
+                    .find { it.startsWith(text) }
+                    ?.substring(text.length)?.toInt() ?: 1
+            val currentVer = description.permissions.map { it.description.trim() }
+                    .find { it.startsWith(text) }?.substring(text.length)?.toInt() ?: 1
+            println("Latest: " + latestVer)
+            println("Current: " + currentVer)
+        })
     }
 
     override fun onDisable() {
