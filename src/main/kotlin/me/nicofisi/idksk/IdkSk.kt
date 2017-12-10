@@ -3,10 +3,12 @@ package me.nicofisi.idksk
 import ch.njol.skript.Skript
 import ch.njol.skript.classes.ClassInfo
 import ch.njol.skript.registrations.Classes
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import org.mcstats.Metrics
+import java.io.File
 import java.net.URL
 import javax.script.ScriptEngine
 import javax.script.ScriptException
@@ -15,6 +17,8 @@ class IdkSk : JavaPlugin() {
     companion object {
         var instance: IdkSk? = null
     }
+
+    var downloadedJarVersion: Int = 0
 
     override fun onEnable() {
         instance = this
@@ -41,18 +45,25 @@ class IdkSk : JavaPlugin() {
 
         logger.info("I find it kind of surprising, but everything loaded successfully!")
 
-        Bukkit.getScheduler().runTaskAsynchronously(this, {
-            val text = "int-version "
-            val ymlUrl = URL("https://raw.githubusercontent.com/Nicofisi/IdkSk/master/src/main/resources/plugin.yml")
-            val latestYml = IOUtils.toString(ymlUrl, "UTF-8")
-            val latestVer = latestYml.split("\n").map { it.trim() }
-                    .find { it.startsWith(text) }
-                    ?.substring(text.length)?.toInt() ?: 1
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, {
+            val latestInfoUrl = URL("https://nicofi.si/idksk/latest-version.txt")
+            val latestInfo = IOUtils.toString(latestInfoUrl, "UTF-8")
+            val latestVer = latestInfo.substring(0, latestInfo.indexOf(" ")).toInt()
             val currentVer = description.permissions.map { it.description.trim() }
-                    .find { it.startsWith(text) }?.substring(text.length)?.toInt() ?: 1
-            println("Latest: " + latestVer)
-            println("Current: " + currentVer)
-        })
+                    .find { it.startsWith("int-version ") }?.substring("int-version ".length)?.toInt() ?: 1
+            if (currentVer >= latestVer || latestVer == downloadedJarVersion) return@runTaskTimerAsynchronously // everything is fine
+            val downloadUrl = latestInfo.substring(latestInfo.indexOf(" ") + 1)
+            logger.info("Downloading an update for IdkSk from $downloadUrl")
+            val tempFile = File.createTempFile("IdkSk", "jar")
+            FileUtils.copyURLToFile(URL(downloadUrl), tempFile)
+            val currentJarFile = File(javaClass.protectionDomain.codeSource.location.toURI())
+            currentJarFile.delete()
+            currentJarFile.createNewFile()
+            FileUtils.copyFile(tempFile, currentJarFile)
+            tempFile.delete()
+            downloadedJarVersion = latestVer
+            logger.info("Hmm.. Thats it! Restart the server for the update to work")
+        }, 20 * 15, 28 * 60 * 90)
     }
 
     override fun onDisable() {

@@ -1,7 +1,9 @@
 name: IdkSk
-version: 1.2
+version: 1.2.1
 author: Nicofisi
 main: me.nicofisi.idksk.IdkSk
+loadbefore: [Skellett, Umbaska]
+softdepend: [Skript]
 permissions:
   idksk.intversion:
-    description: int-version 4
+    description: int-version 5
